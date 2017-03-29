@@ -67,7 +67,7 @@ getGroup <- function(group_id, token, n=25, since=NULL, until=NULL, feed=TRUE, a
 	if (n<=25){
 		url <- paste0(url, "&limit=", n)
 	}
-	if (n>25){
+	if (n>25 or n=="all"){
 		url <- paste0(url, "&limit=25")
 	}
 	# making query
@@ -102,10 +102,14 @@ getGroup <- function(group_id, token, n=25, since=NULL, until=NULL, feed=TRUE, a
 	}
 
 	## paging if n>25
-	if (n>25){
+	if (n>25 or n=="all"){
 		df.list <- list(df)
-		while (l<n & length(content$data)>0 & 
-			!is.null(content$paging$`next`) & sincedate <= mindate){
+		if (n=="all"){
+		   cond <- (length(content$data)>0 & !is.null(content$paging$`next`) & sincedate <= mindate)
+		} else {
+		   cond <- (l<n & length(content$data)>0 & !is.null(content$paging$`next`) & sincedate <= mindate)
+		}
+		while (cond){
 			# waiting one second before making next API call...
 			Sys.sleep(0.5)
 			url <- content$paging$`next`
